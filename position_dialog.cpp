@@ -27,14 +27,17 @@ void CoeffsTableItem::setData(int column, int role, const QVariant &value)
 {
     if(role == Qt::EditRole)
     {
+
         if(column == 0)
             name = value.toString();
+
         if(column == 1)
-            p = value.toDouble();
+            p = value.toString().startsWith("-") ? 0 : value.toDouble();
         if(column == 2)
-            rd = value.toDouble();
+            rd = value.toString().startsWith("-") ? 0 : value.toDouble();
         if(column == 3)
-            rp = value.toDouble();
+            rp = value.toString().startsWith("-") ? 0 : value.toDouble();
+
     }
     QTreeWidgetItem::setData(column, role, value);
 }
@@ -124,7 +127,7 @@ PositionDialog::PositionDialog(int caption_id, PositionItem *item, QWidget *pare
         connect(saveBtn, &QPushButton::clicked, this, [ = ]()
         {
             QSqlQuery query;
-            query.prepare("insert into positions (caption_id, prove, name, unit, metadata) values(?, ?, ?, ?)");
+            query.prepare("insert into positions (caption_id, prove, name, unit, metadata) values(?, ?, ?, ?, ?)");
             query.addBindValue(caption_id);
             query.addBindValue(proveEdit->text());
             query.addBindValue(nameEdit->text());
@@ -149,6 +152,7 @@ CoeffsTable::CoeffsTable(QWidget *parent)
     : QTreeWidget(parent)
 {
     this->setColumnCount(4);
+    this->setHeaderLabels(QStringList() << "Имя" << "Проектная Д" << "Рабочая Д" << "Рабочий П");
 }
 
 void CoeffsTable::addItem()
