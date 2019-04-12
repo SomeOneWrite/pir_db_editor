@@ -138,6 +138,43 @@ void CaptionModel::addCaption(QModelIndex parent_index, int collection_id)
     this->dataChanged(this->index(0, 0), this->index(this->rowCount(parent_index), this->columnCount()));
 }
 
+void CaptionModel::removeCaption(QModelIndex index)
+{
+    if(!index.isValid()) return;
+
+    auto item = static_cast<CaptionItem*>(index.internalPointer());
+    auto parent = item->parentItem();
+    if(item)
+    {
+        QSqlQuery query;
+        query.prepare("delete from captions where id = ?");
+        query.addBindValue(item->getId());
+        query.exec();
+        if(query.lastError().type() != QSqlError::NoError)
+        {
+            qDebug() << query.lastError().text();
+            return;
+        }
+        this->dataChanged(this->index(0, 0), this->index(this->rowCount(this->index(parent->row(), parent->row())), this->columnCount()));
+        return;
+        if(item->parentItem())
+        {
+            item->parentItem()->removeChild(item);
+        }
+        else
+        {
+            qDebug() << " item has no parent";
+            return;
+        }
+
+    }
+    else
+    {
+        return;
+    }
+    this->dataChanged(this->index(0, 0), this->index(this->rowCount(this->index(parent->row(), parent->row())), this->columnCount()));
+}
+
 bool CaptionModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if(index.isValid() && role == Qt::EditRole)
@@ -208,6 +245,20 @@ CaptionItem::~CaptionItem()
 void CaptionItem::appendChild(CaptionItem *child)
 {
     m_childItems.append(child);
+}
+
+void CaptionItem::removeChild(int index)
+{
+    m_childItems.at(index)->~CaptionItem();
+    m_childItems.removeAt(index);
+}
+
+void CaptionItem::removeChild(CaptionItem *child)
+{
+    auto index = m_childItems.indexOf(child);
+    if(index < 0) return;
+    m_childItems.at(index)->~CaptionItem();
+    m_childItems.removeAt(index);
 }
 
 CaptionItem *CaptionItem::child(int row)

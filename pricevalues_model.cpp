@@ -12,6 +12,20 @@ PriceValueModel::PriceValueModel()
 
 }
 
+void PriceValueModel::addPriceValue(int position_id)
+{
+    QSqlQuery query;
+    query.prepare("insert into price_values(name, position_id) values(?, ?)");
+    query.addBindValue("Новая позиция");
+    query.addBindValue(position_id);
+    query.exec();
+    if(query.lastError().type() != QSqlError::NoError)
+    {
+        qDebug() << query.lastError().text();
+        return;
+    }
+}
+
 int PriceValueModel::rowCount(const QModelIndex &parent) const
 {
     return items.count();

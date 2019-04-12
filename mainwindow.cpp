@@ -58,6 +58,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
         captionView->update();
     });
+    connect(captionRemoveBtn, &QPushButton::clicked, this, [ = ]()
+    {
+        auto index = captionView->selectionModel()->currentIndex();
+        currentCaptionModel->removeCaption(index);
+
+        captionView->setModel(currentCaptionModel);
+    });
     connect(positionAddBtn, &QPushButton::clicked, this, [ = ]()
     {
         auto dialog = new PositionDialog(currentCaptionId, nullptr, this);
@@ -67,13 +74,29 @@ MainWindow::MainWindow(QWidget *parent) :
     });
     connect(priceValueAddBtn, &QPushButton::clicked, this, [ = ]()
     {
-        collectionModel->addCollection();
+        auto index = positionView->selectionModel()->currentIndex();
+
+        currentPriceValueModel->addPriceValue(currentPositionsModel->getItem(index)->id.toInt());
     });
+    auto selectionChanged =  [ = ]()
+    {
+        auto index = captionView->selectionModel()->currentIndex();
+        auto item = static_cast<CaptionItem*>(index.internalPointer());
+        if(item)
+        {
+            currentPositionsModel = new PositionsModel();
+            currentPositionsModel->updateItems(item->getId());
+            positionView->setModel(currentPositionsModel);
+            //positionView->resizeColumnToContents(1);
+            currentCaptionId = item->getId();
+        }
+    };
     connect(collectionView, &QTableView::clicked, this, [ = ](const QModelIndex & index)
     {
         auto id = collectionModel->getId(index.row());
         currentCaptionModel = new CaptionModel(id);
         captionView->setModel(currentCaptionModel);
+        connect(captionView->selectionModel(), &QItemSelectionModel::selectionChanged, this, selectionChanged);
         captionView->resizeColumnToContents(0);
         currentCollectionId = id;
     });
@@ -90,6 +113,8 @@ MainWindow::MainWindow(QWidget *parent) :
             currentCaptionId = item->getId();
         }
     });
+
+
 
     connect(positionView, &QTreeView::clicked, this, [ = ](const QModelIndex & index)
     {
@@ -127,6 +152,8 @@ MainWindow::MainWindow(QWidget *parent) :
     btnsLay->addWidget(collectionAddBtn);
     btnsLay->addWidget(captionAddBtn);
     btnsLay->addWidget(positionAddBtn);
+    btnsLay->addWidget(priceValueAddBtn);
+    btnsLay->addWidget(captionRemoveBtn);
     layout->addLayout(btnsLay);
     setLayout(layout);
 }

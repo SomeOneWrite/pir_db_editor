@@ -10,7 +10,8 @@ public:
     ~CaptionItem();
 
     void appendChild(CaptionItem *child);
-
+    void removeChild(int index);
+    void removeChild(CaptionItem *child);
     CaptionItem *child(int row);
     int childCount() const;
     int columnCount() const;
@@ -46,6 +47,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     void addCaption(QModelIndex parent_index, int collection_id);
+    void removeCaption(QModelIndex index);
     bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 private:
     void setupModelData(int collection_id);

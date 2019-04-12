@@ -14,6 +14,7 @@
 
 class CaptionModel;
 class PositionsModel;
+class PriceValueModel;
 
 class MainWindow : public QWidget
 {
@@ -27,6 +28,7 @@ public:
     QSqlQuery *query;
     CaptionModel *currentCaptionModel;
     PositionsModel *currentPositionsModel;
+    PriceValueModel *currentPriceValueModel;
     int currentCollectionId;
     int currentCaptionId;
     int currentPositionId;
